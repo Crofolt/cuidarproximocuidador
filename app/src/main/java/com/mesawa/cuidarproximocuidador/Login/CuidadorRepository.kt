@@ -2,10 +2,12 @@ package com.mesawa.cuidarproximocuidador.Login
 
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mesawa.cuidarproximocuidador.data.firestore.CuidadorFirestoreTree
 import java.util.Locale
 
 class CuidadorRepository(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
+    private val tree: CuidadorFirestoreTree = CuidadorFirestoreTree(firestore)
 ) {
 
     fun validarCuidador(
@@ -16,6 +18,41 @@ class CuidadorRepository(
         val uid = usuario.uid
         val email = usuario.email.orEmpty().lowercase(Locale.ROOT)
 
+        firestore.collection("profissionais_publicos")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { docPublico ->
+                if (docPublico.exists()) {
+                    val ativo = estaAtivo(docPublico.get("ativo"))
+                    val perfil = CuidadorPerfil(
+                        id = texto(docPublico.get("id_profissional")).ifBlank { uid },
+                        nome = texto(docPublico.get("nome")).ifBlank { usuario.displayName ?: "Cuidador" },
+                        especialidade = texto(docPublico.get("especialidade")).ifBlank { "Cuidador profissional" },
+                        ativo = ativo,
+                        fotoUrl = texto(docPublico.get("fotoUrl")).ifBlank { texto(docPublico.get("foto_url")) }
+                    )
+                    if (!ativo) {
+                        onBlocked("Seu cadastro foi encontrado, mas ainda esta inativo.")
+                    } else {
+                        tree.salvarIdProfissional(uid, perfil.id)
+                        onSuccess(perfil)
+                    }
+                    return@addOnSuccessListener
+                }
+                validarLegado(usuario, uid, email, onSuccess, onBlocked)
+            }
+            .addOnFailureListener {
+                validarLegado(usuario, uid, email, onSuccess, onBlocked)
+            }
+    }
+
+    private fun validarLegado(
+        usuario: FirebaseUser,
+        uid: String,
+        email: String,
+        onSuccess: (CuidadorPerfil) -> Unit,
+        onBlocked: (String) -> Unit
+    ) {
         firestore.collection("cuidadores")
             .document("profissionais")
             .get()
@@ -45,7 +82,10 @@ class CuidadorRepository(
                 when {
                     perfil == null -> onBlocked("Este login ainda nao esta vinculado a um cuidador cadastrado.")
                     !perfil.ativo -> onBlocked("Seu cadastro foi encontrado, mas ainda esta inativo.")
-                    else -> onSuccess(perfil)
+                    else -> {
+                        tree.salvarIdProfissional(uid, perfil.id)
+                        onSuccess(perfil)
+                    }
                 }
             }
             .addOnFailureListener {

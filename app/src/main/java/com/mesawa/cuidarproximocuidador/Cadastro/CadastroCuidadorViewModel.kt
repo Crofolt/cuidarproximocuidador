@@ -29,7 +29,6 @@ class CadastroCuidadorViewModel {
             "uid" to uid,
             "status" to "em_analise",
             "ativo" to false,
-            "fotoUrl" to fotoUrl,
             "dados_pessoais" to mapOf(
                 "nome" to dados.nomeCompleto,
                 "cpf" to dados.cpf,
@@ -38,9 +37,21 @@ class CadastroCuidadorViewModel {
                 "email" to dados.email,
                 "foto_url" to fotoUrl
             ),
-            "atendimento" to mapOf(
+            "perfil_publico" to mapOf(
+                "nome" to dados.nomeCompleto,
+                "especialidade" to dados.especialidade,
                 "cidade" to dados.cidade,
                 "uf" to dados.uf.uppercase(),
+                "fotoUrl" to fotoUrl,
+                "ativo" to false
+            ),
+            "atendimento" to mapOf(
+                "cidade" to dados.cidade,
+                "cidade_normalizada" to normalizarCidade(dados.cidade),
+                "uf" to dados.uf.uppercase(),
+                "estado" to "Parana",
+                "latitude" to dados.latitude,
+                "longitude" to dados.longitude,
                 "raio_km" to dados.raioKm,
                 "valor_hora" to dados.valorHora,
                 "disponibilidade" to dados.disponibilidade
@@ -64,5 +75,21 @@ class CadastroCuidadorViewModel {
             "criado_em" to FieldValue.serverTimestamp(),
             "atualizado_em" to FieldValue.serverTimestamp()
         )
+    }
+
+    private fun normalizarCidade(cidade: String): String {
+        return cidade.lowercase()
+            .replace("á", "a")
+            .replace("ã", "a")
+            .replace("â", "a")
+            .replace("é", "e")
+            .replace("ê", "e")
+            .replace("í", "i")
+            .replace("ó", "o")
+            .replace("ô", "o")
+            .replace("õ", "o")
+            .replace("ú", "u")
+            .replace("ç", "c")
+            .trim()
     }
 }

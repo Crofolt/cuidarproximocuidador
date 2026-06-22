@@ -2,11 +2,13 @@ package com.mesawa.cuidarproximocuidador.ui.perfil.suporte
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mesawa.cuidarproximocuidador.data.firestore.CuidadorFirestoreTree
 import com.mesawa.cuidarproximocuidador.data.local.LocalSqlStore
 
 class SuporteSacRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val localSql: LocalSqlStore = LocalSqlStore.instance
+    private val localSql: LocalSqlStore = LocalSqlStore.instance,
+    private val tree: CuidadorFirestoreTree = CuidadorFirestoreTree(firestore)
 ) {
     fun salvarMensagem(
         uid: String,
@@ -25,13 +27,18 @@ class SuporteSacRepository(
         )
         localSql.salvarEvento(uid, "sac_mensagem", payload)
 
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .collection("sac_mensagens")
-            .add(payload + ("criadoEm" to Timestamp.now()))
-            .addOnSuccessListener {
-                localSql.salvarRegistro(uid, "sac_mensagem", it.id, payload, sincronizado = true)
-            }
+        tree.comCuidadorDocDaConta(
+            uid = uid,
+            idPreferido = cuidadorId,
+            onSuccess = { _, cuidadorRef ->
+                cuidadorRef.collection("sac_mensagens")
+                    .add(payload + ("criadoEm" to Timestamp.now()))
+                    .addOnSuccessListener {
+                        localSql.salvarRegistro(uid, "sac_mensagem", it.id, payload, sincronizado = true)
+                    }
+            },
+            onFailure = {}
+        )
     }
 
     fun salvarAcaoSac(uid: String, cuidadorId: String, tipo: String, destino: String) {
@@ -45,12 +52,17 @@ class SuporteSacRepository(
         )
         localSql.salvarEvento(uid, "sac_mensagem", payload)
 
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .collection("sac_mensagens")
-            .add(payload + ("criadoEm" to Timestamp.now()))
-            .addOnSuccessListener {
-                localSql.salvarRegistro(uid, "sac_mensagem", it.id, payload, sincronizado = true)
-            }
+        tree.comCuidadorDocDaConta(
+            uid = uid,
+            idPreferido = cuidadorId,
+            onSuccess = { _, cuidadorRef ->
+                cuidadorRef.collection("sac_mensagens")
+                    .add(payload + ("criadoEm" to Timestamp.now()))
+                    .addOnSuccessListener {
+                        localSql.salvarRegistro(uid, "sac_mensagem", it.id, payload, sincronizado = true)
+                    }
+            },
+            onFailure = {}
+        )
     }
 }

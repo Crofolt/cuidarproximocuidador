@@ -37,35 +37,40 @@
                 android:text="Início" />
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/navPropostas"
             style="@style/NavCuidadorItem">
 
-            <ImageView
-                android:id="@+id/iconNavPropostas"
-                style="@style/NavCuidadorIcon"
-                android:src="@drawable/ic_nav_propostas" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/iconNavPropostas"
+                    style="@style/NavCuidadorIcon"
+                    android:src="@drawable/ic_nav_propostas" />
+
+                <TextView
+                    android:id="@+id/textNavPropostas"
+                    style="@style/NavCuidadorLabel"
+                    android:text="Propostas" />
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/textNavPropostas"
-                style="@style/NavCuidadorLabel"
-                android:text="Propostas" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navAgenda"
-            style="@style/NavCuidadorItem">
-
-            <ImageView
-                android:id="@+id/iconNavAgenda"
-                style="@style/NavCuidadorIcon"
-                android:src="@drawable/ic_nav_agenda" />
-
-            <TextView
-                android:id="@+id/textNavAgenda"
-                style="@style/NavCuidadorLabel"
-                android:text="Agenda" />
-        </LinearLayout>
+                android:id="@+id/badgeNavPropostas"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/bg_nav_badge"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/navAnalise"

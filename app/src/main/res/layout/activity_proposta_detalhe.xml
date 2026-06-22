@@ -1,54 +1,258 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootPropostaDetalhe"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F4F9FB">
+    android:background="@drawable/bg_screen_soft"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="18dp"
+        android:paddingTop="26dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="34dp">
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Analisar proposta"
-            android:textColor="#0F2F3D"
-            android:textSize="26sp"
+            android:id="@+id/buttonVoltarProposta"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="‹  Propostas"
+            android:textColor="#075FA8"
+            android:textSize="16sp"
             android:textStyle="bold" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/bg_soft_panel"
-            android:elevation="5dp"
-            android:padding="18dp"
-            android:text="Idosa: Irene, 80 anos\nCondição: saudável, precisa de apoio preventivo\nEndereço: Rua das Flores, Maringá\nTempo: 4 horas\nValor: R$ 320,00\nDistância: 2,4 km\n\nTarefas:\n• Companhia e conversa\n• Banho assistido\n• Lembrete de medicação\n• Prevenção de quedas\n\nObservações da família:\nPrefere cuidadora paciente e calma. Possui leve dificuldade para caminhar."
-            android:textColor="#263A46"
-            android:textSize="16sp" />
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_proposal_hero"
+            android:elevation="3dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:id="@+id/imageIdosoDetalhe"
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:background="@drawable/bg_avatar_elder"
+                android:padding="18dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_profile_face" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textStatusDetalhe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:background="@drawable/bg_chip_soft"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:text="Nova proposta"
+                    android:textColor="#075FA8"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textIdosoDetalhe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="9dp"
+                    android:text="Irene, 80 anos"
+                    android:textColor="#0F172A"
+                    android:textSize="23sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textCondicaoDetalhe"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Apoio preventivo"
+                    android:textColor="#476977"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textTempoDetalhe"
+                android:layout_width="0dp"
+                android:layout_height="62dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_proposal_card"
+                android:gravity="center"
+                android:text="4h\nTempo"
+                android:textColor="#0F2F3D"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textValorDetalhe"
+                android:layout_width="0dp"
+                android:layout_height="62dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_proposal_card"
+                android:gravity="center"
+                android:text="R$ 320\nOferecido"
+                android:textColor="#0F2F3D"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textDistanciaDetalhe"
+                android:layout_width="0dp"
+                android:layout_height="62dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_proposal_card"
+                android:gravity="center"
+                android:text="2,4 km\nRota"
+                android:textColor="#0F2F3D"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_proposal_card"
+            android:elevation="4dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dados do cuidado"
+                android:textColor="#0F172A"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textEnderecoDetalhe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Rua das Flores, Maringa"
+                android:textColor="#334155"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/textTarefasDetalhe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_status_warn"
+                android:padding="14dp"
+                android:text="Tarefas"
+                android:textColor="#7C4A03"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/textObservacaoDetalhe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="Observacoes"
+                android:textColor="#475569"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerCandidaturaEnviada"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_chip_selected_green"
+            android:orientation="vertical"
+            android:padding="14dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/textTituloCandidaturaEnviada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Perfil enviado"
+                android:textColor="#17643A"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textMensagemCandidaturaEnviada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Seu currículo do app foi enviado para o cliente analisar. Aqui aparece aceito ou recusado quando ele responder."
+                android:textColor="#315C44"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/buttonVerPropostas"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button_whatsapp"
+                    android:text="Ver propostas"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/buttonChatProposta"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button_chat"
+                    android:text="Mensagem"
+                    android:textAllCaps="false"
+                    android:textColor="#075FA8"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
 
         <Button
-            android:id="@+id/buttonAceitarProposta"
+            android:id="@+id/buttonEnviarPerfilProposta"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="58dp"
             android:layout_marginTop="18dp"
             android:background="@drawable/bg_login_button_primary"
-            android:text="Aceitar proposta"
+            android:text="Enviar meu currículo do aplicativo"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/buttonRecusarProposta"
+            android:id="@+id/buttonVoltarSemEnviar"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="58dp"
             android:layout_marginTop="10dp"
-            android:background="@drawable/bg_login_toggle"
-            android:text="Voltar sem aceitar"
+            android:background="@drawable/bg_button_decline"
+            android:text="Sair"
             android:textAllCaps="false"
-            android:textColor="#075FA8"
+            android:textColor="#BD1F3A"
             android:textStyle="bold" />
     </LinearLayout>
 </ScrollView>

@@ -4,12 +4,14 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.mesawa.cuidarproximocuidador.data.firestore.CuidadorFirestoreTree
 import com.mesawa.cuidarproximocuidador.data.local.LocalSqlStore
 
 class ConfiguracoesRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val localSql: LocalSqlStore = LocalSqlStore.instance
+    private val localSql: LocalSqlStore = LocalSqlStore.instance,
+    private val tree: CuidadorFirestoreTree = CuidadorFirestoreTree(firestore)
 ) {
     fun salvarDadosConta(
         nome: String,
@@ -26,24 +28,49 @@ class ConfiguracoesRepository(
             "atualizado_em" to Timestamp.now()
         )
         localSql.salvarRegistro(uid, "configuracoes", "dados_conta", payload)
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .set(
-                mapOf(
-                    "dados_pessoais" to mapOf(
-                        "nome_publico" to nome,
-                        "telefone" to telefone,
-                        "cidade" to cidade
-                    ),
-                    "atualizado_em" to Timestamp.now()
-                ),
-                SetOptions.merge()
-            )
-            .addOnSuccessListener {
-                localSql.salvarRegistro(uid, "configuracoes", "dados_conta", payload, sincronizado = true)
-                onSuccess()
-            }
-            .addOnFailureListener { onFailure("Nao consegui salvar os dados da conta agora.") }
+        tree.encontrarIdProfissional(
+            uid = uid,
+            idPreferido = "",
+            onSuccess = { idProfissional ->
+                tree.cadastroDoc(idProfissional)
+                    .set(
+                        mapOf(
+                            "uid" to uid,
+                            "uid_auth" to uid,
+                            "id_profissional" to idProfissional,
+                            "dados_pessoais" to mapOf(
+                                "nome_publico" to nome,
+                                "telefone" to telefone,
+                                "cidade" to cidade
+                            ),
+                            "perfil_publico" to mapOf(
+                                "id_profissional" to idProfissional,
+                                "nome" to nome,
+                                "cidade" to cidade
+                            ),
+                            "atualizado_em" to Timestamp.now()
+                        ),
+                        SetOptions.merge()
+                    )
+                    .addOnSuccessListener {
+                        tree.salvarPerfilPublico(
+                            uid = uid,
+                            idProfissional = idProfissional,
+                            dados = mapOf("nome" to nome, "cidade" to cidade)
+                        )
+                        tree.profissionaisLegadoDoc().update(
+                            mapOf(
+                                "medicos.$idProfissional.nome" to nome,
+                                "medicos.$idProfissional.cidade" to cidade
+                            )
+                        )
+                        localSql.salvarRegistro(uid, "configuracoes", "dados_conta", payload, sincronizado = true)
+                        onSuccess()
+                    }
+                    .addOnFailureListener { onFailure("Nao consegui salvar os dados da conta agora.") }
+            },
+            onFailure = onFailure
+        )
     }
 
     fun salvarEndereco(
@@ -61,24 +88,30 @@ class ConfiguracoesRepository(
             "atualizado_em" to Timestamp.now()
         )
         localSql.salvarRegistro(uid, "configuracoes", "endereco_atendimento", payload)
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .set(
-                mapOf(
-                    "atendimento" to mapOf(
-                        "endereco_base" to endereco,
-                        "cidade" to cidade,
-                        "raio_km" to raioKm
+        tree.comCuidadorDocDaConta(
+            uid = uid,
+            onSuccess = { _, docRef ->
+                docRef.set(
+                    mapOf(
+                        "uid" to uid,
+                        "uid_auth" to uid,
+                        "atendimento" to mapOf(
+                            "endereco_base" to endereco,
+                            "cidade" to cidade,
+                            "raio_km" to raioKm
+                        ),
+                        "atualizado_em" to Timestamp.now()
                     ),
-                    "atualizado_em" to Timestamp.now()
-                ),
-                SetOptions.merge()
-            )
-            .addOnSuccessListener {
-                localSql.salvarRegistro(uid, "configuracoes", "endereco_atendimento", payload, sincronizado = true)
-                onSuccess()
-            }
-            .addOnFailureListener { onFailure("Nao consegui salvar endereco e regioes agora.") }
+                    SetOptions.merge()
+                )
+                    .addOnSuccessListener {
+                        localSql.salvarRegistro(uid, "configuracoes", "endereco_atendimento", payload, sincronizado = true)
+                        onSuccess()
+                    }
+                    .addOnFailureListener { onFailure("Nao consegui salvar endereco e regioes agora.") }
+            },
+            onFailure = onFailure
+        )
     }
 
     fun alterarSenha(novaSenha: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
@@ -109,15 +142,19 @@ class ConfiguracoesRepository(
             "criado_em" to Timestamp.now()
         )
         localSql.salvarEvento(uid, "solicitacao_conta", payload)
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .collection("solicitacoes_conta")
-            .add(payload)
-            .addOnSuccessListener {
-                localSql.salvarRegistro(uid, "solicitacao_conta", it.id, payload, sincronizado = true)
-                onSuccess()
-            }
-            .addOnFailureListener { onFailure("Nao consegui registrar a solicitacao agora.") }
+        tree.comCuidadorDocDaConta(
+            uid = uid,
+            onSuccess = { _, docRef ->
+                docRef.collection("solicitacoes_conta")
+                    .add(payload)
+                    .addOnSuccessListener {
+                        localSql.salvarRegistro(uid, "solicitacao_conta", it.id, payload, sincronizado = true)
+                        onSuccess()
+                    }
+                    .addOnFailureListener { onFailure("Nao consegui registrar a solicitacao agora.") }
+            },
+            onFailure = onFailure
+        )
     }
 
     private fun registrarSolicitacao(uid: String, tipo: String, mensagem: String) {
@@ -128,10 +165,11 @@ class ConfiguracoesRepository(
             "criado_em" to Timestamp.now()
         )
         localSql.salvarEvento(uid, "seguranca_conta", payload, sincronizado = true)
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .collection("seguranca_conta")
-            .add(payload)
+        tree.comCuidadorDocDaConta(
+            uid = uid,
+            onSuccess = { _, docRef -> docRef.collection("seguranca_conta").add(payload) },
+            onFailure = {}
+        )
     }
 
     private fun uidAtual(onFailure: (String) -> Unit): String? {

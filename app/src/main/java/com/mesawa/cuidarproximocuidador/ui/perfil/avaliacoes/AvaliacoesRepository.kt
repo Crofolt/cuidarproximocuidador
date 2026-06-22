@@ -4,11 +4,13 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
+import com.mesawa.cuidarproximocuidador.data.firestore.CuidadorFirestoreTree
 import com.mesawa.cuidarproximocuidador.data.local.LocalSqlStore
 
 class AvaliacoesRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val localSql: LocalSqlStore = LocalSqlStore.instance
+    private val localSql: LocalSqlStore = LocalSqlStore.instance,
+    private val tree: CuidadorFirestoreTree = CuidadorFirestoreTree(firestore)
 ) {
     fun carregar(
         uid: String,
@@ -21,15 +23,16 @@ class AvaliacoesRepository(
             return
         }
 
-        val ref = firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .collection("avaliacoes")
-
-        ref.orderBy("criadoEm", Query.Direction.DESCENDING)
-            .get()
-            .addOnSuccessListener { snapshot ->
+        tree.comCuidadorDocDaConta(
+            uid = uid,
+            idPreferido = cuidadorId,
+            onSuccess = { idProfissional, cuidadorRef ->
+                val ref = cuidadorRef.collection("avaliacoes")
+                ref.orderBy("criadoEm", Query.Direction.DESCENDING)
+                    .get()
+                    .addOnSuccessListener { snapshot ->
                 if (snapshot.isEmpty) {
-                    salvarAvaliacoesIniciais(uid, cuidadorId, ref) {
+                    salvarAvaliacoesIniciais(uid, idProfissional, ref) {
                         onSuccess(avaliacoesFake())
                     }
                     return@addOnSuccessListener
@@ -49,7 +52,10 @@ class AvaliacoesRepository(
                 }
                 onSuccess(avaliacoes.ifEmpty { avaliacoesFake() })
             }
-            .addOnFailureListener { onError() }
+                    .addOnFailureListener { onError() }
+            },
+            onFailure = { onError() }
+        )
     }
 
     private fun salvarAvaliacoesIniciais(
@@ -86,8 +92,7 @@ class AvaliacoesRepository(
                 }
         }
 
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
+        tree.cuidadorDoc(cuidadorId)
             .set(
                 mapOf(
                     "avaliacoesResumo" to mapOf(

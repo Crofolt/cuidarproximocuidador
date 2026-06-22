@@ -1,85 +1,302 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_screen_soft"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Propostas"
-            android:textColor="#0F2F3D"
-            android:textSize="26sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Analise os dados do idoso antes de aceitar o cuidado."
-            android:textColor="#436574"
-            android:textSize="15sp" />
+        android:paddingStart="18dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="18dp"
+        android:paddingBottom="98dp">
 
         <LinearLayout
-            android:id="@+id/cardPropostaFake"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/bg_soft_panel"
-            android:elevation="6dp"
+            android:background="@drawable/bg_proposal_hero"
+            android:elevation="2dp"
             android:orientation="vertical"
             android:padding="18dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nova proposta"
-                android:textColor="#075FA8"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Irene • 80 anos"
+                android:text="Propostas"
                 android:textColor="#0F2F3D"
-                android:textSize="22sp"
+                android:textSize="25sp"
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/textResumoPropostas"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="4 horas • R$ 320,00 • 2,4 km"
-                android:textColor="#436574"
-                android:textSize="15sp" />
+                android:layout_marginTop="8dp"
+                android:text="Novas oportunidades para analisar e enviar seu currículo do app."
+                android:textColor="#3D6675"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chipAtivas"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_chip_selected_green"
+                    android:gravity="center"
+                    android:text="Ativas"
+                    android:textColor="#17643A"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/chipHistorico"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_chip_soft"
+                    android:gravity="center"
+                    android:text="Histórico"
+                    android:textColor="#45606A"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cardPropostaAtual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_proposal_card"
+            android:elevation="5dp"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="76dp"
+                    android:layout_height="76dp">
+
+                    <ImageView
+                        android:id="@+id/imageIdosoProposta"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/bg_avatar_elder"
+                        android:padding="15dp"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile_face" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/textStatusProposta"
+                        android:layout_width="wrap_content"
+                        android:layout_height="30dp"
+                        android:background="@drawable/bg_chip_soft"
+                        android:gravity="center"
+                        android:paddingHorizontal="12dp"
+                        android:text="Boa oportunidade"
+                        android:textColor="#075FA8"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textIdosoProposta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Irene, 80 anos"
+                        android:textColor="#0F172A"
+                        android:textSize="21sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textCondicaoProposta"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="3dp"
+                        android:text="Apoio preventivo e rotina leve"
+                        android:textColor="#5B7280"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textValorProposta"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_chip_soft"
+                    android:gravity="center"
+                    android:text="Precisa\ncompanhia"
+                    android:textColor="#0F2F3D"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textTempoProposta"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_chip_soft"
+                    android:gravity="center"
+                    android:text="4h"
+                    android:textColor="#0F2F3D"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textDistanciaProposta"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_chip_soft"
+                    android:gravity="center"
+                    android:text="Maringá\nPR"
+                    android:textColor="#0F2F3D"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <TextView
+                android:id="@+id/textTarefasProposta"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="14dp"
                 android:background="@drawable/bg_status_warn"
-                android:padding="12dp"
-                android:text="Cuidados: companhia, banho assistido, medicação lembrada e prevenção de quedas."
+                android:padding="14dp"
+                android:text="Companhia, banho assistido, medicação e prevenção de quedas."
                 android:textColor="#7C4A03"
                 android:textSize="14sp" />
+
+            <LinearLayout
+                android:id="@+id/containerProgressoProposta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:background="@drawable/bg_chip_soft"
+                android:orientation="vertical"
+                android:padding="14dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/textProgressoProposta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Em andamento • faltam 3 dias"
+                    android:textColor="#075FA8"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <ProgressBar
+                    android:id="@+id/progressProposta"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp"
+                    android:layout_marginTop="10dp"
+                    android:max="100"
+                    android:progress="8"
+                    android:progressTint="#2E9BFF"
+                    android:progressBackgroundTint="#CFEAFF" />
+            </LinearLayout>
 
             <Button
                 android:id="@+id/buttonVerProposta"
                 android:layout_width="match_parent"
-                android:layout_height="54dp"
+                android:layout_height="56dp"
                 android:layout_marginTop="14dp"
                 android:background="@drawable/bg_login_button_primary"
-                android:text="Ver detalhes antes de aceitar"
+                android:text="Ver detalhes"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
+
+            <LinearLayout
+                android:id="@+id/containerAcoesProposta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/buttonAceitarPropostaLista"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button_whatsapp"
+                    android:text="Aceitar"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/buttonRecusarPropostaLista"
+                    android:layout_width="0dp"
+                    android:layout_height="54dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_button_decline"
+                    android:text="Recusar"
+                    android:textAllCaps="false"
+                    android:textColor="#BD1F3A"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cardHistoricoVazio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_proposal_card"
+            android:elevation="3dp"
+            android:orientation="vertical"
+            android:padding="18dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Histórico pronto"
+                android:textColor="#0F172A"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textHistorico"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="Quando uma proposta for recusada ou finalizada, ela aparece aqui com status e observações."
+                android:textColor="#64748B"
+                android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

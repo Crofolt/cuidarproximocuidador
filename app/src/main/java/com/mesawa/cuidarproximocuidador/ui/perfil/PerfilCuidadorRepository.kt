@@ -3,10 +3,12 @@ package com.mesawa.cuidarproximocuidador.ui.perfil
 import android.net.Uri
 import com.google.firebase.firestore.Source
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageException
+import com.mesawa.cuidarproximocuidador.data.firestore.CuidadorFirestoreTree
 import com.mesawa.cuidarproximocuidador.data.local.LocalSqlStore
 import java.util.Locale
 
@@ -14,7 +16,8 @@ class PerfilCuidadorRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
     private val storage: FirebaseStorage = FirebaseStorage.getInstance(),
-    private val localSql: LocalSqlStore = LocalSqlStore.instance
+    private val localSql: LocalSqlStore = LocalSqlStore.instance,
+    private val tree: CuidadorFirestoreTree = CuidadorFirestoreTree(firestore)
 ) {
 
     val uidAtual: String
@@ -33,34 +36,52 @@ class PerfilCuidadorRepository(
         onFailure: (String) -> Unit
     ) {
         val uid = auth.currentUser?.uid.orEmpty()
-        firestore.collection("cuidadores")
-            .document("profissionais")
-            .get(Source.SERVER)
-            .addOnSuccessListener { doc ->
-                val medicos = doc.get("medicos") as? Map<*, *>
-                val entry = medicos?.entries?.firstOrNull { (id, value) ->
-                    val dados = value as? Map<*, *> ?: return@firstOrNull false
-                    id.toString() == cuidadorId || texto(dados["uid"]) == uid
-                }
+        tree.encontrarIdProfissional(
+            uid = uid,
+            idPreferido = cuidadorId,
+            onSuccess = { idPrivado ->
+                tree.cadastroDoc(idPrivado)
+                    .get(Source.SERVER)
+                    .addOnSuccessListener { cadastro ->
+                        tree.profissionalPublicoDoc(idPrivado)
+                    .get(Source.SERVER)
+                    .addOnSuccessListener { doc ->
+                        val publico = doc.data
+                        val dadosPessoais = cadastro.get("dados_pessoais") as? Map<*, *>
+                        val atendimento = cadastro.get("atendimento") as? Map<*, *>
+                        val perfilPublico = cadastro.get("perfil_publico") as? Map<*, *>
+                        val fotoPrivada = texto(dadosPessoais?.get("foto_url"))
+                            .ifBlank { texto(perfilPublico?.get("fotoUrl")) }
+                            .ifBlank { texto(cadastro.get("fotoUrl")) }
 
-                val dadosMap = entry?.value as? Map<*, *>
-                onSuccess(
-                    PerfilCuidadorDados(
-                        id = entry?.key?.toString().orEmpty().ifBlank { cuidadorId },
-                        uid = uid,
-                        nome = texto(dadosMap?.get("nome")).ifBlank { fallbackNome.ifBlank { "Cuidadora" } },
-                        especialidade = texto(dadosMap?.get("especialidade")).ifBlank { fallbackEspecialidade.ifBlank { "Cuidadora profissional" } },
-                        cidade = texto(dadosMap?.get("cidade")).ifBlank { texto(dadosMap?.get("localizacao")) },
-                        avaliacao = numero(dadosMap?.get("avaliacao")),
-                        atendimentos = inteiro(dadosMap?.get("atendimentos")),
-                        faturamentoMes = numero(dadosMap?.get("faturamentoMes")).ifZero { calcularFaturamentoEstimado(dadosMap) },
-                        fotoUrl = texto(dadosMap?.get("fotoUrl")).ifBlank { fallbackFotoUrl },
-                        ativo = ativo(dadosMap?.get("ativo")),
-                        reconhecimentoFacial = ativo(dadosMap?.get("reconhecimentoFacial"))
-                    )
-                )
-            }
-            .addOnFailureListener { onFailure("Não consegui carregar os dados do perfil agora.") }
+                        onSuccess(
+                            PerfilCuidadorDados(
+                                id = texto(publico?.get("id_profissional")).ifBlank { idPrivado },
+                                uid = uid,
+                                nome = texto(dadosPessoais?.get("nome_publico"))
+                                    .ifBlank { texto(dadosPessoais?.get("nome")) }
+                                    .ifBlank { texto(publico?.get("nome")) }
+                                    .ifBlank { fallbackNome.ifBlank { "Cuidadora" } },
+                                especialidade = texto(publico?.get("especialidade")).ifBlank { fallbackEspecialidade.ifBlank { "Cuidadora profissional" } },
+                                cidade = texto(atendimento?.get("cidade"))
+                                    .ifBlank { texto(dadosPessoais?.get("cidade")) }
+                                    .ifBlank { texto(publico?.get("cidade")) }
+                                    .ifBlank { texto(publico?.get("localizacao")) },
+                                avaliacao = numero(publico?.get("avaliacao")),
+                                atendimentos = inteiro(publico?.get("atendimentos")),
+                                faturamentoMes = numero(publico?.get("faturamentoMes")).ifZero { calcularFaturamentoEstimado(publico) },
+                                fotoUrl = fotoPrivada.ifBlank { texto(publico?.get("fotoUrl")).ifBlank { fallbackFotoUrl } },
+                                ativo = ativo(publico?.get("ativo")),
+                                reconhecimentoFacial = ativo(publico?.get("reconhecimentoFacial"))
+                            )
+                        )
+                    }
+                    .addOnFailureListener { onFailure("Não consegui carregar os dados do perfil agora.") }
+                    }
+                    .addOnFailureListener { onFailure("Não consegui carregar os dados do perfil agora.") }
+            },
+            onFailure = onFailure
+        )
     }
 
     fun salvarFotoPerfil(
@@ -95,30 +116,51 @@ class PerfilCuidadorRepository(
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val payload = mapOf(
-            "uid" to uid,
-            "cuidadorId" to cuidadorId,
-            "fotoUrl" to fotoUrl
+        tree.encontrarIdProfissional(
+            uid = uid,
+            idPreferido = cuidadorId,
+            onSuccess = { idProfissional ->
+                val payload = mapOf(
+                    "uid" to uid,
+                    "id_profissional" to idProfissional,
+                    "fotoUrl" to fotoUrl
+                )
+                localSql.salvarRegistro(uid, "perfil", "foto", payload)
+
+                tree.cadastroDoc(idProfissional)
+                    .set(
+                        mapOf(
+                            "uid" to uid,
+                            "uid_auth" to uid,
+                            "id_profissional" to idProfissional,
+                            "dados_pessoais" to mapOf("foto_url" to fotoUrl),
+                            "perfil_publico" to mapOf(
+                                "id_profissional" to idProfissional,
+                                "fotoUrl" to fotoUrl
+                            ),
+                            "fotoUrl" to FieldValue.delete(),
+                            "atualizado_em" to com.google.firebase.Timestamp.now()
+                        ),
+                        SetOptions.merge()
+                    )
+
+                tree.salvarPerfilPublico(
+                    uid = uid,
+                    idProfissional = idProfissional,
+                    dados = mapOf("fotoUrl" to fotoUrl)
+                )
+
+                tree.profissionaisLegadoDoc()
+                    .update(mapOf("medicos.$idProfissional.fotoUrl" to fotoUrl))
+                    .addOnSuccessListener {
+                        tree.removerFotoPublicaTopLevel()
+                        localSql.salvarRegistro(uid, "perfil", "foto", payload, sincronizado = true)
+                        onSuccess(fotoUrl)
+                    }
+                    .addOnFailureListener { onFailure("Foto enviada, mas não consegui atualizar o perfil profissional.") }
+            },
+            onFailure = onFailure
         )
-        localSql.salvarRegistro(uid, "perfil", "foto", payload)
-
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .set(mapOf("fotoUrl" to fotoUrl), SetOptions.merge())
-
-        val updates = mutableMapOf<String, Any>("fotoUrl" to fotoUrl)
-        if (cuidadorId.isNotBlank()) {
-            updates["medicos.$cuidadorId.fotoUrl"] = fotoUrl
-        }
-
-        firestore.collection("cuidadores")
-            .document("profissionais")
-            .update(updates)
-            .addOnSuccessListener {
-                localSql.salvarRegistro(uid, "perfil", "foto", payload, sincronizado = true)
-                onSuccess(fotoUrl)
-            }
-            .addOnFailureListener { onFailure("Foto enviada, mas não consegui atualizar o perfil profissional.") }
     }
 
     private fun mensagemStorage(error: Exception): String {

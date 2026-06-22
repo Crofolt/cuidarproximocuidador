@@ -52,19 +52,6 @@
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/rowEditarDadosConta"
-            android:layout_width="match_parent"
-            android:layout_height="58dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/bg_menu_row"
-            android:gravity="center_vertical"
-            android:paddingHorizontal="16dp"
-            android:text="Editar nome, telefone e cidade  >"
-            android:textColor="#334155"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <TextView
             android:id="@+id/rowTrocarSenha"
             android:layout_width="match_parent"
             android:layout_height="58dp"

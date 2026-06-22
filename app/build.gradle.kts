@@ -1,10 +1,11 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.services)
 }
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 android {
     namespace = "com.mesawa.cuidarproximocuidador"
@@ -30,12 +31,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlin {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_21)
         }
     }
 }
@@ -55,6 +56,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.androidx.activity)
     implementation(libs.androidx.core)
+    implementation("com.google.android.material:material:1.14.0")
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.lifecycle.viewmodel)
     implementation(libs.androidx.lifecycle.livedata)

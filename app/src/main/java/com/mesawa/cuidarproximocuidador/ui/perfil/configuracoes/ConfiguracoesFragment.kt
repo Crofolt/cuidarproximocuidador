@@ -23,7 +23,6 @@ class ConfiguracoesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel = ViewModelProvider(this)[ConfiguracoesViewModel::class.java]
         view.findViewById<TextView>(R.id.buttonVoltarConfiguracoes).setOnClickListener { requireActivity().finish() }
-        view.findViewById<View>(R.id.rowEditarDadosConta).setOnClickListener { abrirDadosConta() }
         view.findViewById<View>(R.id.rowTrocarSenha).setOnClickListener { abrirTrocarSenha() }
         view.findViewById<View>(R.id.rowEnderecoAtendimento).setOnClickListener { abrirEndereco() }
         view.findViewById<View>(R.id.rowPausarPerfil).setOnClickListener {
@@ -36,14 +35,6 @@ class ConfiguracoesFragment : Fragment() {
 
     private fun aviso(texto: String) {
         Toast.makeText(requireContext(), texto, Toast.LENGTH_LONG).show()
-    }
-
-    private fun abrirDadosConta() {
-        val layout = campos("Nome público", "Telefone/WhatsApp", "Cidade")
-        dialog("Editar dados da conta", layout) {
-            val valores = valores(layout)
-            viewModel.salvarDadosConta(valores[0], valores[1], valores[2], ::sucessoEVoltar, ::aviso)
-        }
     }
 
     private fun abrirTrocarSenha() {

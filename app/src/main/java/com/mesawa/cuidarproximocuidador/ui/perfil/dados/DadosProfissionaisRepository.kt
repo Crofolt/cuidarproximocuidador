@@ -4,12 +4,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import com.mesawa.cuidarproximocuidador.data.firestore.CuidadorFirestoreTree
 import com.mesawa.cuidarproximocuidador.data.local.LocalSqlStore
 
 class DadosProfissionaisRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val localSql: LocalSqlStore = LocalSqlStore.instance
+    private val localSql: LocalSqlStore = LocalSqlStore.instance,
+    private val tree: CuidadorFirestoreTree = CuidadorFirestoreTree(firestore)
 ) {
     fun salvar(
         cuidadorId: String,
@@ -86,14 +88,42 @@ class DadosProfissionaisRepository(
             )
         )
 
-        salvarCadastro(uid, cadastro)
-        salvarProfissional(uid, cuidadorId, profissional, onSuccess, onFailure)
+        tree.encontrarIdProfissional(
+            uid = uid,
+            idPreferido = cuidadorId,
+            onSuccess = { idProfissional ->
+                salvarCadastro(uid, idProfissional, cadastro, profissional)
+                salvarProfissional(uid, idProfissional, profissional, onSuccess, onFailure)
+            },
+            onFailure = onFailure
+        )
     }
 
-    private fun salvarCadastro(uid: String, cadastro: Map<String, Any>) {
-        firestore.collection("cuidadores_cadastros")
-            .document(uid)
-            .set(cadastro, SetOptions.merge())
+    private fun salvarCadastro(
+        uid: String,
+        idProfissional: String,
+        cadastro: Map<String, Any>,
+        profissional: Map<String, Any>
+    ) {
+        tree.cadastroDoc(idProfissional).set(
+            cadastro + mapOf(
+                "uid" to uid,
+                "uid_auth" to uid,
+                "id_profissional" to idProfissional,
+                "perfil_publico" to mapOf(
+                    "id_profissional" to idProfissional,
+                    "especialidade" to profissional["especialidade"],
+                    "funcao" to profissional["funcao"],
+                    "valorHora" to profissional["valorHora"],
+                    "valor_hora" to profissional["valor_hora"],
+                    "bio" to profissional["bio"],
+                    "sobre_voce" to profissional["sobre_voce"],
+                    "disponibilidade" to profissional["disponibilidade"]
+                )
+            ),
+            SetOptions.merge()
+        )
+        tree.salvarPerfilPublico(uid, idProfissional, profissional)
     }
 
     private fun experienciaTexto(form: DadosProfissionaisForm): String {
@@ -117,7 +147,7 @@ class DadosProfissionaisRepository(
         onSuccess: () -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val docRef = firestore.collection("cuidadores").document("profissionais")
+        val docRef = tree.profissionaisLegadoDoc()
         val id = cuidadorId.trim()
         if (id.isNotBlank()) {
             docRef.get()
@@ -127,6 +157,7 @@ class DadosProfissionaisRepository(
                         .orEmpty()
                     docRef.update(mapOf("medicos.$id" to atual + dados))
                         .addOnSuccessListener {
+                            tree.salvarIdProfissional(uid, id)
                             localSql.salvarRegistro(uid, "dados_profissionais", "curriculo", mapOf("cuidadorId" to id, "profissional" to (atual + dados)), sincronizado = true)
                             onSuccess()
                         }

@@ -10,6 +10,8 @@ data class CadastroCuidadorDados(
     val fotoPerfilUri: String?,
     val cidade: String,
     val uf: String,
+    val latitude: Double?,
+    val longitude: Double?,
     val raioKm: String,
     val valorHora: String,
     val disponibilidade: String,

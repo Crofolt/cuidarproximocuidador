@@ -153,16 +153,40 @@
                 android:layout_marginTop="14dp"
                 android:text="Endereço e atendimento" />
 
-            <EditText
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_chip_selected_green"
+                android:padding="14dp"
+                android:text="Atuação inicial: Maringá, Paraná. O app usa sua cidade para mostrar vagas próximas."
+                android:textColor="#17643A"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/buttonUsarLocalizacaoCadastro"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/bg_button_chat"
+                android:text="Usar localização aproximada"
+                android:textAllCaps="false"
+                android:textColor="#075FA8"
+                android:textStyle="bold" />
+
+            <AutoCompleteTextView
                 android:id="@+id/editCidade"
                 style="@style/CadastroInput"
-                android:hint="Cidade de atendimento"
-                android:inputType="textCapWords" />
+                android:hint="Cidade de atendimento no Paraná"
+                android:inputType="textCapWords"
+                android:completionThreshold="1" />
 
             <EditText
                 android:id="@+id/editUf"
                 style="@style/CadastroInput"
                 android:hint="UF"
+                android:enabled="false"
                 android:inputType="textCapCharacters"
                 android:maxLength="2" />
 
