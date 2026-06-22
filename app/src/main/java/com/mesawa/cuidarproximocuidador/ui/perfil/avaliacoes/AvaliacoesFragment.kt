@@ -16,93 +16,132 @@ import com.mesawa.cuidarproximocuidador.ui.perfil.ImagemUrlLoader
 import com.mesawa.cuidarproximocuidador.ui.perfil.PerfilLocalCache
 
 class AvaliacoesFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+
+    private lateinit var viewModel: AvaliacoesViewModel
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return inflater.inflate(R.layout.activity_perfil_avaliacoes, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val viewModel = ViewModelProvider(this)[AvaliacoesViewModel::class.java]
-        view.findViewById<TextView>(R.id.buttonVoltarAvaliacoes).setOnClickListener { requireActivity().finish() }
+
+        viewModel = ViewModelProvider(this)[AvaliacoesViewModel::class.java]
+
+        val titulo = view.findViewById<TextView>(R.id.textAvaliacoesTitulo)
+        val msg = view.findViewById<TextView>(R.id.textAvaliacoesMensagem)
+        val container = view.findViewById<LinearLayout>(R.id.containerAvaliacoes)
+
+        val imagem = view.findViewById<ImageView>(R.id.imageAvaliacaoPerfilBg)
+
+        // BACK BUTTON
+        view.findViewById<TextView>(R.id.buttonVoltarAvaliacoes)
+            .setOnClickListener { requireActivity().onBackPressed() }
+
+        // OBSERVERS
         viewModel.titulo.observe(viewLifecycleOwner) {
-            view.findViewById<TextView>(R.id.textAvaliacoesTitulo).text = it
+            titulo.text = it
         }
-        viewModel.avaliacoes.observe(viewLifecycleOwner) {
-            renderizarAvaliacoes(view.findViewById(R.id.containerAvaliacoes), it)
-        }
+
         viewModel.mensagem.observe(viewLifecycleOwner) {
-            view.findViewById<TextView>(R.id.textAvaliacoesMensagem).text = it
+            msg.text = it
         }
-        carregarFoto(view.findViewById(R.id.imageAvaliacaoPerfil))
+
+        viewModel.avaliacoes.observe(viewLifecycleOwner) {
+            render(container, it)
+        }
+
+        carregarImagem(imagem)
+
+        val cuidadorId =
+            requireActivity().intent.getStringExtra(HomeCuidadorActivity.EXTRA_ID).orEmpty()
+
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        val cuidadorId = requireActivity().intent.getStringExtra(HomeCuidadorActivity.EXTRA_ID).orEmpty()
+
         viewModel.carregar(uid, cuidadorId)
     }
 
-    private fun carregarFoto(imageView: ImageView) {
+    private fun carregarImagem(imageView: ImageView) {
         val cache = PerfilLocalCache(requireContext())
+
         val id = requireActivity().intent.getStringExtra(HomeCuidadorActivity.EXTRA_ID).orEmpty()
         val uid = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-        val fotoUrl = cache.carregar(uid)?.fotoUrl
-            .orEmpty()
-            .ifBlank { cache.carregar(id)?.fotoUrl.orEmpty() }
-            .orEmpty()
-            .ifBlank { requireActivity().intent.getStringExtra(HomeCuidadorActivity.EXTRA_FOTO_URL).orEmpty() }
-        ImagemUrlLoader.carregar(imageView, fotoUrl)
+
+        val fotoUrl =
+            cache.carregar(uid)?.fotoUrl
+                ?: cache.carregar(id)?.fotoUrl
+                ?: requireActivity().intent.getStringExtra(HomeCuidadorActivity.EXTRA_FOTO_URL)
+
+        ImagemUrlLoader.carregar(imageView, fotoUrl ?: "")
     }
 
-    private fun renderizarAvaliacoes(container: LinearLayout, avaliacoes: List<AvaliacaoRecebida>) {
+    private fun render(container: LinearLayout, lista: List<AvaliacaoRecebida>) {
         container.removeAllViews()
-        avaliacoes.forEach { avaliacao ->
-            container.addView(cardAvaliacao(avaliacao))
+
+        lista.forEach {
+            container.addView(card(it))
         }
     }
 
-    private fun cardAvaliacao(avaliacao: AvaliacaoRecebida): View {
+    private fun card(av: AvaliacaoRecebida): View {
         val density = resources.displayMetrics.density
+
         val card = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundResource(R.drawable.bg_profile_card)
-            elevation = 3f * density
-            setPadding((18 * density).toInt(), (16 * density).toInt(), (18 * density).toInt(), (16 * density).toInt())
+            elevation = 6f * density
+            setPadding(
+                (16 * density).toInt(),
+                (14 * density).toInt(),
+                (16 * density).toInt(),
+                (14 * density).toInt()
+            )
         }
-        card.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            topMargin = (10 * density).toInt()
-        }
-        card.addView(TextView(requireContext()).apply {
-            text = estrelas(avaliacao.estrelas)
-            textSize = 25f
-            setTextColor(android.graphics.Color.parseColor("#D99A00"))
+
+        val estrelas = TextView(requireContext()).apply {
+            text = gerarEstrelas(av.estrelas)
+            textSize = 18f
+            setTextColor(android.graphics.Color.parseColor("#F59E0B"))
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-        })
-        card.addView(TextView(requireContext()).apply {
-            text = avaliacao.cliente
-            textSize = 17f
+        }
+
+        val nome = TextView(requireContext()).apply {
+            text = av.cliente
+            textSize = 16f
             setTextColor(android.graphics.Color.parseColor("#0F172A"))
             typeface = android.graphics.Typeface.DEFAULT_BOLD
-        })
-        card.addView(TextView(requireContext()).apply {
-            text = avaliacao.comentario
+        }
+
+        val comentario = TextView(requireContext()).apply {
+            text = av.comentario
             textSize = 14f
             setTextColor(android.graphics.Color.parseColor("#475569"))
             setPadding(0, (6 * density).toInt(), 0, 0)
-            setLineSpacing(2f * density, 1.0f)
-        })
-        if (avaliacao.data.isNotBlank()) {
-            card.addView(TextView(requireContext()).apply {
-                text = avaliacao.data
-                textSize = 12f
-                setTextColor(android.graphics.Color.parseColor("#94A3B8"))
-                setPadding(0, (10 * density).toInt(), 0, 0)
-            })
         }
+
+        val data = TextView(requireContext()).apply {
+            text = av.data
+            textSize = 12f
+            setTextColor(android.graphics.Color.parseColor("#94A3B8"))
+            setPadding(0, (8 * density).toInt(), 0, 0)
+        }
+
+        card.addView(estrelas)
+        card.addView(nome)
+        card.addView(comentario)
+
+        if (av.data.isNotBlank()) {
+            card.addView(data)
+        }
+
         return card
     }
 
-    private fun estrelas(nota: Double): String {
-        val cheias = nota.toInt().coerceIn(1, 5)
-        return List(cheias) { "★" }.joinToString(" ")
+    private fun gerarEstrelas(nota: Double): String {
+        val cheia = nota.toInt().coerceIn(0, 5)
+        return "★ ".repeat(cheia).trim()
     }
 }

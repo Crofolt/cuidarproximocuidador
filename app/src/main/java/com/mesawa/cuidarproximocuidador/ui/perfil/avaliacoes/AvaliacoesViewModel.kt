@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 
 class AvaliacoesViewModel : ViewModel() {
     private val repository = AvaliacoesRepository()
-    private val _titulo = MutableLiveData("5.0 estrelas")
+    private val _titulo = MutableLiveData("5.0")
     val titulo: LiveData<String> = _titulo
     private val _avaliacoes = MutableLiveData<List<AvaliacaoRecebida>>(emptyList())
     val avaliacoes: LiveData<List<AvaliacaoRecebida>> = _avaliacoes
@@ -19,7 +19,7 @@ class AvaliacoesViewModel : ViewModel() {
             cuidadorId = cuidadorId,
             onSuccess = { avaliacoes ->
                 val media = avaliacoes.map { it.estrelas }.average().takeIf { !it.isNaN() } ?: 5.0
-                _titulo.value = String.format("%.1f estrelas", media)
+                _titulo.value = String.format("%.1f", media)
                 _avaliacoes.value = avaliacoes
                 _mensagem.value = ""
             },

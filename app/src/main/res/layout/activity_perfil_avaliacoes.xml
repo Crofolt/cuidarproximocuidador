@@ -10,11 +10,27 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="252dp"
             android:background="@drawable/bg_review_photo">
 
+            <!-- FOTO OCUPANDO TODO FUNDO (AGORA CORRETO) -->
+            <ImageView
+                android:id="@+id/imageAvaliacaoPerfilBg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_account_box" />
+
+            <!-- overlay leve pra manter legibilidade -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#66000000" />
+
+            <!-- VOLTAR -->
             <TextView
                 android:id="@+id/buttonVoltarAvaliacoes"
                 android:layout_width="wrap_content"
@@ -22,31 +38,56 @@
                 android:layout_marginStart="18dp"
                 android:layout_marginTop="14dp"
                 android:gravity="center"
-                android:text="‹  Perfil"
-                android:textColor="#075FA8"
+                android:text="‹ Perfil"
+                android:textColor="#FFFFFF"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <com.mesawa.cuidarproximocuidador.ui.perfil.CircleImageView
-                android:id="@+id/imageAvaliacaoPerfil"
-                android:layout_width="126dp"
-                android:layout_height="126dp"
-                android:layout_gravity="center"
-                android:background="@drawable/bg_avatar_circle"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_account_box" />
-
-            <TextView
-                android:id="@+id/textAvaliacoesTitulo"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
+                android:layout_marginStart="18dp"
+                android:layout_marginEnd="18dp"
                 android:layout_marginBottom="24dp"
+                android:background="@drawable/bg_rating_badge"
                 android:gravity="center"
-                android:text="5.0 estrelas"
-                android:textColor="#0F172A"
-                android:textSize="26sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/textAvaliacoesTitulo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="5.0"
+                    android:textColor="#0F172A"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="★ ★ ★ ★ ★"
+                        android:textColor="#D99A00"
+                        android:textSize="21sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="1dp"
+                        android:text="avaliação das famílias"
+                        android:textColor="#64748B"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
         </FrameLayout>
 
         <LinearLayout
